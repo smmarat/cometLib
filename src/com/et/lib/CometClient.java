@@ -1,6 +1,5 @@
 package com.et.lib;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Timer;
@@ -18,7 +17,7 @@ public class CometClient {
     private Comet comet;
     private String sendUrl;
     private boolean isRunning = false;
-    private BlockingQueue<JSONObject> queue = new ArrayBlockingQueue<JSONObject>(20);
+    private BlockingQueue<Req> queue = new ArrayBlockingQueue<Req>(20);
     private Timer timer;
 
     private CometClient(String receiveUrl, String sendUrl, Comet.CometListener listener) {
@@ -32,8 +31,8 @@ public class CometClient {
         return instance;
     }
 
-    public void add(JSONObject jo) {
-        queue.add(jo);
+    public void add(Req r) {
+        queue.add(r);
         if (!isRunning) {
             isRunning = true;
             timer = new Timer();
@@ -44,16 +43,15 @@ public class CometClient {
     private class Sender extends TimerTask {
         @Override
         public void run() {
-            try {
-                JSONArray arr = new JSONArray();
-                while (queue.size() > 0) {
-                    arr.put(queue.take());
+            while (queue.size() > 0) {
+                Req r = queue.poll();
+                try {
+                    String s = new Http().post(sendUrl, r.getData().toString());
+                    JSONObject jo = new JSONObject(s);
+                    r.getListener().onResponce(jo);
+                } catch (Exception e) {
+                    r.getListener().onError(e);
                 }
-                if (arr.length() > 0) {
-                    new Http().post(sendUrl, arr.toString());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }
