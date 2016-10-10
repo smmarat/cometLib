@@ -35,6 +35,10 @@ public class Http {
         return request(url, null, null, false);
     }
 
+    public String get(String url, boolean isComet) {
+        return request(url, null, null, isComet);
+    }
+
     public String request(String url, String conntype, InputStream data, boolean isComet) {
 
         String rez = null;

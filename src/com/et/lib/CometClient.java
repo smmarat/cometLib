@@ -20,14 +20,16 @@ public class CometClient {
     private BlockingQueue<Req> queue = new ArrayBlockingQueue<Req>(20);
     private Timer timer;
 
-    private CometClient(String receiveUrl, String sendUrl, Comet.CometListener listener) {
+    private CometClient(String sendUrl) {
         this.sendUrl = sendUrl;
+    }
+
+    public void connect(String receiveUrl, Comet.CometListener listener) {
         comet = new Comet(receiveUrl, listener);
     }
 
-    public static CometClient getInstance(String receiveUrl, String sendUrl, Comet.CometListener listener) {
-        if (instance == null) instance = new CometClient(receiveUrl, sendUrl, listener);
-        if (!instance.comet.isRunning()) instance.comet = new Comet(receiveUrl, listener);
+    public static CometClient getInstance(String sendUrl) {
+        if (instance == null) instance = new CometClient(sendUrl);
         return instance;
     }
 

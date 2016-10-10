@@ -16,7 +16,6 @@ public class Comet extends Thread {
     public static int MAX_RETRY = 3;
     private String id;
     private String url;
-    private String lbi;
     private boolean running;
 
     public Comet(String url, CometListener listener) {
@@ -33,12 +32,9 @@ public class Comet extends Thread {
         running = true;
         while (running && r <= MAX_RETRY) {
             try {
-                String s = new Http().post(url, new JSONObject().put("lbi", lbi).toString());
+                String s = new Http().get(url, true);
                 JSONObject jo = new JSONObject(s);
                 listener.onData(jo);
-                if (jo.has("bi")) {
-                    lbi = jo.optString("bi");
-                }
                 r = 0;
                 sleep(1000);
             } catch (Exception e) {
