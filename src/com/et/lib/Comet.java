@@ -17,10 +17,12 @@ public class Comet extends Thread {
     private String id;
     private String url;
     private boolean running;
+    private boolean isLog = false;
 
-    public Comet(String url, CometListener listener) {
+    public Comet(String url, boolean isLog, CometListener listener) {
         this.listener = listener;
         this.url = url;
+        this.isLog = isLog;
         this.id = UUID.randomUUID().toString().replace("-", "");
         this.start();
     }
@@ -32,7 +34,10 @@ public class Comet extends Thread {
         running = true;
         while (running && r <= MAX_RETRY) {
             try {
+                String id = UUID.randomUUID().toString().replace("-", "");
+                if (isLog) System.out.println("=---> [" + id + "] " + url);
                 String s = new Http().get(url, true);
+                if (isLog) System.out.println("<---= [" + id + "] " + s);
                 JSONObject jo = new JSONObject(s);
                 listener.onData(jo);
                 r = 0;
